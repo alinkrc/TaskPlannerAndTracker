@@ -48,7 +48,7 @@ const getTaskById = async (req, res) => {
         if (req.user.role !== 'manager' && task.assignedUserId !== req.user.id) {
             return res.status(403).json({error: 'Forbidden'});
         }
-
+        console.log('here');
         return res.json(task);
     } catch (error) {
         console.error('Error fetching task:', error);
@@ -72,6 +72,7 @@ const createTask = async (req, res) => {
         description,
         assignedUserId,
         managerId,
+       
       });
       return res.status(201).json(newTask);
     } else {
@@ -86,7 +87,7 @@ const createTask = async (req, res) => {
 const updateTask = async (req, res) => {
   try {
     const taskId = req.params.id;
-    const { description, assignedUserId, state } = req.body;
+    const { description, assignedUserId, state} = req.body;
 
     const task = await Task.findByPk(taskId);
     if (!task) {
@@ -101,6 +102,7 @@ const updateTask = async (req, res) => {
     // Only allow updating certain fields based on user role
     if (req.user.role === 'manager') {
       task.description = description || task.description;
+     
 
       // If re-assigning the task, check if the new assigned user is valid
       if (assignedUserId !== undefined) {
@@ -119,12 +121,18 @@ const updateTask = async (req, res) => {
       }
     } else if (req.user.role === 'user') {
       // Users can only change the state to COMPLETED
+      if (state === 'PENDING' && task.state === 'OPEN') {
+        console.log(state);
+        console.log(task.state);
+        task.state = state;
+      }
       if (state === 'COMPLETED' && task.state === 'PENDING') {
         task.state = state;
       }
     }
 
     await task.save();
+    console.log(task);
     return res.json(task);
   } catch (error) {
     console.error('Error updating task:', error);

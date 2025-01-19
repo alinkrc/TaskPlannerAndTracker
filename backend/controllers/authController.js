@@ -3,7 +3,8 @@ import jwt from 'jsonwebtoken';
 import User from "../models/User.js";
 
 const generateAccessToken = (user) => {
-    return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+   console.log(user.username);
+    return jwt.sign({ id: user.id, role: user.role, username: user.username }, process.env.JWT_SECRET, {
         expiresIn: '1h',
     });
 };
@@ -23,6 +24,7 @@ const login = async (req, res) => {
         }
 
         const accessToken = generateAccessToken(user);
+        console.log('Access token:', accessToken);
         return res.json({ accessToken });
     } catch (error) {
         console.error('Error during login:', error);

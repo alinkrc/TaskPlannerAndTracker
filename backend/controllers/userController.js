@@ -3,7 +3,9 @@ import bcrypt from 'bcrypt';
 
 const getAllUsers = async (req, res) => {
     try {
-        if (req.user && req.user.role !== 'admin') {
+
+        
+        if (req.user && (req.user.role == 'user')) {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
@@ -48,6 +50,14 @@ const createUser = async (req, res) => {
         }
 
         const { username, password, role, managerId } = req.body;
+
+         // If the role is 'user' and a managerId is provided, check if the managerId exists and is a manager
+        if (role === 'user' && managerId) {
+            const manager = await User.findByPk(managerId);
+            if (!manager || manager.role !== 'manager') {
+                 return res.status(400).json({ error: 'Invalid manager ID' });
+        }
+      }
 
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
